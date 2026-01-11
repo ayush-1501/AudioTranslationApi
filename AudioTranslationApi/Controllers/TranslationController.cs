@@ -31,13 +31,13 @@ public class TranslationController : ControllerBase
     [HttpPost("translate")]
     public async Task<IActionResult> Translate([FromForm] TranslationRequest request)
     {
-        if (request.AudioFile == null || request.AudioFile.Length == 0)
+        if (request.audio_file == null || request.audio_file.Length == 0)
         {
             return BadRequest(new { error = "audio_file is required" });
         }
 
         var jobId = Guid.NewGuid().ToString();
-        var targetLanguages = request.TargetLanguages
+        var targetLanguages = request.target_languages
             .Split(',')
             .Select(s => s.Trim())
             .Where(s => !string.IsNullOrEmpty(s))
@@ -52,19 +52,19 @@ public class TranslationController : ControllerBase
             var pendingDir = _configuration["Storage:PendingDirectory"] ?? "./pending";
             Directory.CreateDirectory(pendingDir);
 
-            var safeName = request.AudioFile.FileName.Replace(" ", "_");
+            var safeName = request.audio_file.FileName.Replace(" ", "_");
             var filename = $"{jobId}_{safeName}";
             audioPath = Path.Combine(pendingDir, filename);
 
             using (var stream = new FileStream(audioPath, FileMode.Create))
             {
-                await request.AudioFile.CopyToAsync(stream);
+                await request.audio_file.CopyToAsync(stream);
             }
         }
         else if (environment == "proto")
         {
             using var memoryStream = new MemoryStream();
-            await request.AudioFile.CopyToAsync(memoryStream);
+            await request.audio_file.CopyToAsync(memoryStream);
             var buffer = memoryStream.ToArray();
 
             var cloudinaryResult = await _cloudinaryService.SaveAudioAsync(buffer);
@@ -81,7 +81,7 @@ public class TranslationController : ControllerBase
             JobId = jobId,
             Status = "queued",
             AudioPath = audioPath,
-            SrcLanguage = request.SrcLanguage,
+            SrcLanguage = request.src_language,
             TargetLanguages = targetLanguages,
             CreatedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             PublicId = uploadedPublicId

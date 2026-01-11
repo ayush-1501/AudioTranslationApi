@@ -54,9 +54,9 @@ public class PythonTranslation
 
 public class TranslationRequest
 {
-    public IFormFile AudioFile { get; set; } = null!;
-    public string SrcLanguage { get; set; } = "English";
-    public string TargetLanguages { get; set; } = string.Empty;
+    public IFormFile audio_file { get; set; } = null!;
+    public string src_language { get; set; } = "English";
+    public string target_languages { get; set; } = string.Empty;
 }
 
 public class TranslationResponse
